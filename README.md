@@ -1,10 +1,11 @@
-# BUSY API
+# SWAPSTEEM NOTIFICATIONS API
 
-The API server for [Busy](https://busy.org/) - Blockchain-based social network where anyone can earn rewards :rocket:.
+The notifications API server for [Swapsteem](https://swapsteem.online/
 
 ## Development
 
-[Yarn](https://yarnpkg.com/) package manager is used for this project. To install yarn, use
+[Yarn](https://yarnpkg.com/) package manager is used for this project. To install yarn, use) - Blockchain-based social network where anyone can earn rewards :rocket:.
+
 
 ```shell
 $ npm i -g yarn
