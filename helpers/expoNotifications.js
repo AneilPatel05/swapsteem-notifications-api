@@ -46,42 +46,39 @@ const getNotificationMessage = (notification, token) => {
 
   let message = {};
   switch (notification[1].type) {
-    case notificationTypes.VOTE:
+    case notificationTypes.ORDER:
       message = {
-        body:
-          data.weight > 0
-            ? `${data.voter} upvoted your post.`
-            : `${data.voter} downvoted your post.`,
+        body: `${data.from} sent you an order for ${data.amount}.`,
       };
       break;
 
     case notificationTypes.TRANSFER:
       message = {
-        body: `${data.from} sent you ${data.amount}.`,
+        body: `${data.from} sent you ${data.amount} in escrow with.`,
       };
       break;
 
-    case notificationTypes.REPLY:
+    case notificationTypes.APPROVE:
       message = {
-        body: `${data.author} replied to your post.`,
+        body: `${data.from} approved your escrow transfer.`,
       };
       break;
 
-    case notificationTypes.FOLLOW:
+    case notificationTypes.RELEASE:
       message = {
-        body: `${data.follower} followed you.`,
+        body: `${data.from} approved the escrow transfer.`,
       };
       break;
 
-    case notificationTypes.REBLOG:
+    case notificationTypes.DISPUTE:
       message = {
-        body: `${data.account} reblogged your post.`,
+        body: `${data.from} raised a dispute for escrow transfer.`,
       };
       break;
 
-    case notificationTypes.MENTION:
+    case notificationTypes.FEEDBACK:
       message = {
-        body: `${data.author} mentioned you in a ` + (data.is_root_post ? 'post.' : 'comment.'),
+        body: `${data.from} left a feedback for you ` ,
       };
       break;
 

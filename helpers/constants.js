@@ -1,10 +1,10 @@
 const notificationTypes = {
-  FOLLOW: 'follow',
-  REPLY: 'reply',
-  TRANSFER: 'transfer',
-  VOTE: 'vote',
-  REBLOG: 'reblog',
-  MENTION: 'mention',
+  TRANSFER : 'transfer',
+  APPROVE : 'approve',
+  RELEASE : 'release',
+  DISPUTE : 'dispute',
+  ORDER: 'order',
+  FEEDBACK: 'feedback',
 };
 
 module.exports = {
