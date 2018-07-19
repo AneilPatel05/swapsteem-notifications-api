@@ -149,7 +149,7 @@ const getNotifications = ops => {
           case 'swapsteem': {
             /** Find follow */
             if (
-              json.type === 'order'
+              json[0] === 'order' && json[1].account
             ) {
               const order = {
                 type: 'order',
@@ -161,7 +161,7 @@ const getNotifications = ops => {
               orders.push([json.app, order]);
             }
             /** Find reblog */
-            if (json.type === 'advertisement' && json.account ) {
+            if (json[0] === 'advertisement' && json[1].account ) {
               const advertisement = {
                 type: 'advertisement',
                 account: json.account,
@@ -234,7 +234,7 @@ const loadBlock = blockNum => {
         notifications[1].forEach(notification => {
           redisOps.push([
             'lpush',
-            `orders:${notification[0]}`,
+            `orders`,
             JSON.stringify(notification[1]),
           ]);
           redisOps.push(['ltrim', `orders:${notification[0]}`, 0, limit - 1]);
@@ -242,7 +242,7 @@ const loadBlock = blockNum => {
         notifications[2].forEach(notification => {
           redisOps.push([
             'lpush',
-            `advertisements:${notification[0]}`,
+            `advertisements`,
             JSON.stringify(notification[1]),
           ]);
           redisOps.push(['ltrim', `advertisements:${notification[0]}`, 0, limit - 1]);
@@ -289,8 +289,8 @@ const loadNextBlock = () => {
   redis
     .getAsync('last_block_num')
     .then(res => {
-      let nextBlockNum = res === null ? 24310140 : parseInt(res) + 1;
-      //let nextBlockNum = 24310140 ; //testing purpose
+      //let nextBlockNum = res === null ? 24310140 : parseInt(res) + 1;
+      let nextBlockNum =  24313411  ; //testing purpose
       utils
         .getGlobalProps()
         .then(globalProps => {
