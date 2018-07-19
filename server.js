@@ -117,6 +117,8 @@ wss.on('connection', ws => {
 
 const getNotifications = ops => {
   const notifications = [];
+  const orders = [];
+  const advertisements = [];
   ops.forEach(op => {
     const type = op.op[0];
     const params = op.op[1];
@@ -136,9 +138,48 @@ const getNotifications = ops => {
         break;
         /** Add Cases for all NOTIFICATIONTYPES */
       }
+      case 'custom_json': {
+        let json = {};
+        try {
+          json = JSON.parse(params.json);
+        } catch (err) {
+          console.log('Wrong json format on custom_json', err);
+        }
+        switch (params.id) {
+          case 'swapsteem': {
+            /** Find follow */
+            if (
+              json.type === 'order'
+            ) {
+              const order = {
+                type: 'order',
+                orderedby: json.orderedby,
+                timestamp: Date.parse(op.timestamp) / 1000,
+                block: op.block,
+              };
+              notifications.push([json.app, order]);
+              orders.push([json.app, order]);
+            }
+            /** Find reblog */
+            if (json.type === 'advertisement' && json.account ) {
+              const advertisement = {
+                type: 'advertisement',
+                account: json.account,
+                block: op.block,
+              };
+              // console.log('Reblog', [json[1].author, JSON.stringify(notification)]);
+              notifications.push([json.account, advertisement]);
+              console.log('got an ad!')
+              advertisements.push([json.account, advertisement]);
+            }
+            break;
+          }
+        }
+        break;
+      }
     }
   });
-  return notifications;
+  return [notifications,orders,advertisements];
 };
 
 const loadBlock = blockNum => {
@@ -182,7 +223,7 @@ const loadBlock = blockNum => {
         const notifications = getNotifications(ops);
         /** Create redis operations array */
         const redisOps = [];
-        notifications.forEach(notification => {
+        notifications[0].forEach(notification => {
           redisOps.push([
             'lpush',
             `notifications:${notification[0]}`,
@@ -190,15 +231,31 @@ const loadBlock = blockNum => {
           ]);
           redisOps.push(['ltrim', `notifications:${notification[0]}`, 0, limit - 1]);
         });
+        notifications[1].forEach(notification => {
+          redisOps.push([
+            'lpush',
+            `orders:${notification[0]}`,
+            JSON.stringify(notification[1]),
+          ]);
+          redisOps.push(['ltrim', `orders:${notification[0]}`, 0, limit - 1]);
+        });
+        notifications[2].forEach(notification => {
+          redisOps.push([
+            'lpush',
+            `advertisements:${notification[0]}`,
+            JSON.stringify(notification[1]),
+          ]);
+          redisOps.push(['ltrim', `advertisements:${notification[0]}`, 0, limit - 1]);
+        });
         redisOps.push(['set', 'last_block_num', blockNum]);
         redis
           .multi(redisOps)
           .execAsync()
           .then(() => {
-            console.log('Block loaded', blockNum, 'notification stored', notifications.length);
+            console.log('Block loaded', blockNum, 'notification stored', notifications[0].length,'orders stored', notifications[1].length,'advertisements stored', notifications[2].length);
 
             /** Send push notification for logged peers */
-            notifications.forEach(notification => {
+            notifications[0].forEach(notification => {
               wss.clients.forEach(client => {
                 if (client.name && client.name === notification[0]) {
                   console.log('Send push notification', notification[0]);
@@ -232,7 +289,8 @@ const loadNextBlock = () => {
   redis
     .getAsync('last_block_num')
     .then(res => {
-      let nextBlockNum = res === null ? 20000000 : parseInt(res) + 1;
+      let nextBlockNum = res === null ? 24310140 : parseInt(res) + 1;
+      //let nextBlockNum = 24310140 ; //testing purpose
       utils
         .getGlobalProps()
         .then(globalProps => {
