@@ -123,10 +123,55 @@ const getNotifications = ops => {
     const type = op.op[0];
     const params = op.op[1];
     switch (type) {
-      case 'transfer': {
+      case 'escrow_transfer': {
         /** Find transfer */
         const notification = {
           type: 'transfer',
+          from: params.from,
+          amount: params.amount,
+          memo: params.memo,
+          timestamp: Date.parse(op.timestamp) / 1000,
+          block: op.block,
+        };
+        // console.log('Transfer', JSON.stringify([params.to, notification]));
+        notifications.push([params.to, notification]);
+        break;
+        /** Add Cases for all NOTIFICATIONTYPES */
+      }
+      case 'escrow_approve': {
+        /** Find transfer */
+        const notification = {
+          type: 'approve',
+          from: params.from,
+          amount: params.amount,
+          memo: params.memo,
+          timestamp: Date.parse(op.timestamp) / 1000,
+          block: op.block,
+        };
+        // console.log('Transfer', JSON.stringify([params.to, notification]));
+        notifications.push([params.to, notification]);
+        break;
+        /** Add Cases for all NOTIFICATIONTYPES */
+      }
+      case 'escrow_release': {
+        /** Find transfer */
+        const notification = {
+          type: 'release',
+          from: params.from,
+          amount: params.amount,
+          memo: params.memo,
+          timestamp: Date.parse(op.timestamp) / 1000,
+          block: op.block,
+        };
+        // console.log('Transfer', JSON.stringify([params.to, notification]));
+        notifications.push([params.to, notification]);
+        break;
+        /** Add Cases for all NOTIFICATIONTYPES */
+      }
+      case 'escrow_dispute': {
+        /** Find transfer */
+        const notification = {
+          type: 'dispute',
           from: params.from,
           amount: params.amount,
           memo: params.memo,
@@ -289,8 +334,8 @@ const loadNextBlock = () => {
   redis
     .getAsync('last_block_num')
     .then(res => {
-      //let nextBlockNum = res === null ? 24310140 : parseInt(res) + 1;
-      let nextBlockNum =  24313411  ; //testing purpose
+      let nextBlockNum = res === null ? 24310140 : parseInt(res) + 1;
+      //let nextBlockNum =  24313411  ; //testing purpose
       utils
         .getGlobalProps()
         .then(globalProps => {
